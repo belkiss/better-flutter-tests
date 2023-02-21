@@ -16,7 +16,7 @@ export function activate() {
 
         var isDirectory = fs.lstatSync(fileChange.newUri.path).isDirectory();
 
-        if (isDirectory == true) {
+        if (isDirectory === true) {
           renameFolder(fileChange.oldUri.path, fileChange.newUri.path);
         }
         else {
@@ -39,7 +39,7 @@ export function activate() {
                 //-> Issue in Github setzen?
                 //-> window.onDidChangeActiveTextEditor nutzen und die aktiven editoren tracken
 
-                fs.renameSync(oldtestFilePath, newTestFilePath)
+                fs.renameSync(oldtestFilePath, newTestFilePath);
 
                 deleteEmptyFoldersRecursively(path.dirname(oldtestFilePath));
 
@@ -65,7 +65,7 @@ export function activate() {
 
 ///Goes bottom up from folderPath and deletes empty folders
 function deleteEmptyFoldersRecursively(folderPath: string) {
-  if(fileOperations.isDirectoryEmpty(folderPath)) {
+  if (fileOperations.isDirectoryEmpty(folderPath)) {
     fs.rmdirSync(folderPath);
     deleteEmptyFoldersRecursively(path.dirname(folderPath));
   }
@@ -81,22 +81,22 @@ function deleteEmptyFoldersRecursively(folderPath: string) {
 //Rekursiv muss allerdings der File-Path angepasst werden :/
 async function renameFolder(oldPath: string, newPath: string) {
   var oldTestFolder = fileOperations.getPathOfTestFolder(oldPath);
-  
+
   console.log(oldTestFolder);
-  
+
   if (fs.existsSync(oldTestFolder)) {
-    
+
     var selectedItem = await vscode.window.showInformationMessage("Do you want to move/rename " + path.basename(oldTestFolder) + " in /test and it's children ?", "Yes", "No");
     if (selectedItem === "Yes") {
-      
+
       var newTestFolder = fileOperations.getPathOfTestFolder(newPath);
 
       //Verzeichnisse die nicht existieren erstellen
       fs.mkdir(path.dirname(newTestFolder), { recursive: true }, (err) => {
 
-        fs.renameSync(oldTestFolder, newTestFolder)
-      
-        deleteEmptyFoldersRecursively(path.dirname(oldTestFolder))
+        fs.renameSync(oldTestFolder, newTestFolder);
+
+        deleteEmptyFoldersRecursively(path.dirname(oldTestFolder));
 
         var relativePathOld = fileOperations.getRelativePathInLibFolder(oldPath);
         var relativePathNew = fileOperations.getRelativePathInLibFolder(newPath);
@@ -113,13 +113,13 @@ async function renameFolder(oldPath: string, newPath: string) {
   }
 }
 
-function updatePathToPackageRecursively(parentFolderPath: string, searchText: string, replaceText: string ) : void {
-      for (let filePath of fileOperations.walkSync(parentFolderPath)) {
-        var content = fs.readFileSync(filePath).toString();
+function updatePathToPackageRecursively(parentFolderPath: string, searchText: string, replaceText: string): void {
+  for (let filePath of fileOperations.walkSync(parentFolderPath)) {
+    var content = fs.readFileSync(filePath).toString();
 
-        //XXX: Scheinbar wird nur das erste vorkommen replaced :/
-        content = content.replace(searchText, replaceText);
-        fs.writeFileSync(filePath, content);
-      }
+    //XXX: Scheinbar wird nur das erste vorkommen replaced :/
+    content = content.replace(searchText, replaceText);
+    fs.writeFileSync(filePath, content);
   }
+}
 

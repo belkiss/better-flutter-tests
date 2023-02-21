@@ -11,7 +11,7 @@ export function createTestFile(originalFilePath: string, className: string | und
 		var pathOfTestFile = fileOperations.getPathOfTestFile(originalFilePath);
 
 		fs.mkdir(path.dirname(pathOfTestFile), { recursive: true }, (err) => {
-			if (err) throw err;
+			if (err) { throw err; }
 
 			var nameOfOriginalFile = path.basename(pathOfTestFile, path.extname(pathOfTestFile));
 
@@ -20,9 +20,9 @@ export function createTestFile(originalFilePath: string, className: string | und
 			if (className === undefined) {
 				var classNames = extractPublicClassNames(originalFilePath);
 
-				if(classNames.length > 0) {
+				if (classNames.length > 0) {
 					//If multiple classNames are found -> take the first one. Usually there is only one className
-					testGroupName = classNames[0]; 
+					testGroupName = classNames[0];
 				}
 				else {
 					testGroupName = nameOfOriginalFile;
@@ -33,12 +33,12 @@ export function createTestFile(originalFilePath: string, className: string | und
 				testGroupName = className;
 			}
 
-			
+
 
 			var testFileContent = getTestFileContent(getPackagePath(originalFilePath), testGroupName);
 			//TODO: Checken, ob Datei bereits existiert, um Überschreiben zu verhindern!
 			fs.writeFile(pathOfTestFile, testFileContent, (err) => {
-				if (err) throw err;
+				if (err) { throw err; }
 
 				//console.log("Test File created");
 
@@ -68,7 +68,7 @@ function extractPublicClassNames(originalFilePath: string): string[] {
 
 	//Matches public classes like class exampleClass<S> {
 	//Private classes are ignored, because we can't create instances in the test file anyway
-	var classNameRegex = /class\s*([a-zA-Z0-9]*)(<\w*>)?\s*\{/; 
+	var classNameRegex = /class\s*([a-zA-Z0-9]*)(<\w*>)?\s*\{/;
 
 	const sourceCodeArr = sourceCode.split('\n');
 
@@ -77,7 +77,7 @@ function extractPublicClassNames(originalFilePath: string): string[] {
 	for (let line = 0; line < sourceCodeArr.length; line++) {
 		var result = sourceCodeArr[line].match(classNameRegex);
 
-		if(result !== null && result.length > 0) {
+		if (result !== null && result.length > 0) {
 			classNames.push(result[1]);
 		}
 	}
@@ -90,7 +90,7 @@ function extractPublicClassNames(originalFilePath: string): string[] {
 
 function getTestFileContent(pathToPackage: string, className: string): string {
 	var packageName = fileOperations.getPackageName();
-	
+
 	return `import 'package:test/test.dart'; 
 import 'package:${packageName}${pathToPackage}';
 

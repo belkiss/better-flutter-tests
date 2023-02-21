@@ -1,9 +1,7 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
-import * as path from 'path';
 
 import * as fileOperations from '../file_operations';
-import * as testFileCreator from '../test_file_creator';
 
 var terminal: vscode.Terminal;
 

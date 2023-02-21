@@ -3,80 +3,80 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 /// Looks, if the path is in /lib folder
-export function isPathInLibFolder(path: string) : boolean {
+export function isPathInLibFolder(path: string): boolean {
 	var libPath = vscode.workspace.rootPath + "/lib";
 	return path.indexOf(libPath) === 0;
 }
 
-export function isTestFile(filePath: string) : boolean {
+export function isTestFile(filePath: string): boolean {
 	var testPath = vscode.workspace.rootPath + "/test";
 
 	return filePath.indexOf(testPath) === 0 && path.basename(filePath).indexOf("_test.dart") >= 0;
 }
 
 export function getRelativePathInLibFolder(filePath: string): string {
-	if(isPathInLibFolder(filePath)) {
+	if (isPathInLibFolder(filePath)) {
 		var libPath = vscode.workspace.rootPath + "/lib";
 		return filePath.substr(libPath.length);
 	}
 	else {
-		throw `${filePath} is not inside of /lib`;
+		throw new Error(`${filePath} is not inside of /lib`);
 	}
 }
 
 ///returns all paths of files in nested folders.
 ///can be used so: for (let filePath of walkSync(parentFolderPath)) {...
-export function *walkSync(dir: string) : Generator<string, any, undefined>{
+export function* walkSync(dir: string): Generator<string, any, undefined> {
 	const files = fs.readdirSync(dir, { withFileTypes: true });
 	for (let i = 0; i < files.length; i++) {
-	  if (files[i].isDirectory()) {
-		yield* walkSync(path.join(dir, files[i].name));
-	  } else {
-		yield path.join(dir, files[i].name);
-	  }
+		if (files[i].isDirectory()) {
+			yield* walkSync(path.join(dir, files[i].name));
+		} else {
+			yield path.join(dir, files[i].name);
+		}
 	}
-  }
+}
 
 export function isDirectoryEmpty(folderPath: string) {
-	return fs.readdirSync(folderPath).length === 0
+	return fs.readdirSync(folderPath).length === 0;
 }
 
 ///Takes a folderName!!!
-export function getPathOfTestFolder(originalFolderPath: string) : string {
+export function getPathOfTestFolder(originalFolderPath: string): string {
 	var relativPathToLibFolder = getRelativePathInLibFolder(originalFolderPath);
 	var testFolder = "test" + relativPathToLibFolder; //path.dirname(relativPathToLibFolder);
 
-	if(vscode.workspace.workspaceFolders !== undefined) {
-		var rootPath = vscode.workspace.workspaceFolders[0].uri.path
+	if (vscode.workspace.workspaceFolders !== undefined) {
+		var rootPath = vscode.workspace.workspaceFolders[0].uri.path;
 		return rootPath + "/" + testFolder;
 	}
 	else {
-		throw "No open workspaceFolders";
+		throw new Error("No open workspaceFolders");
 	}
 
-	
+
 }
 
 /// relativPathToLibFolder is
-export function getPathOfTestFile(originalFilePath: string) : string {
+export function getPathOfTestFile(originalFilePath: string): string {
 	var relativPathToLibFolder = getRelativePathInLibFolder(originalFilePath);
 	var folderOfTestFile = "test" + path.dirname(relativPathToLibFolder);
 
-	if(vscode.workspace.workspaceFolders !== undefined) {
-		var rootPath = vscode.workspace.workspaceFolders[0].uri.path
-	
+	if (vscode.workspace.workspaceFolders !== undefined) {
+		var rootPath = vscode.workspace.workspaceFolders[0].uri.path;
+
 		return rootPath + "/" + folderOfTestFile + "/" + getNameOfTestFile(originalFilePath);
 	}
 	else {
-		throw "No open workspaceFolders";
+		throw new Error("No open workspaceFolders");
 	}
 	//TODO: Exception werfen
 }
 
-export function getNameOfSourceFile(originalFilePath: string) : string {
+export function getNameOfSourceFile(originalFilePath: string): string {
 	var nameOfOriginalFile = path.basename(originalFilePath);
 	var idx = nameOfOriginalFile.indexOf("_test.dart");
-	if(idx === -1 ) {
+	if (idx === -1) {
 		//TODO: Throw Exception, its not a test file
 		return "";
 	}
@@ -86,20 +86,20 @@ export function getNameOfSourceFile(originalFilePath: string) : string {
 	}
 }
 
-export function getNameOfTestFile(originalFilePath: string) : string {
-	var nameOfOriginalFile = path.basename(originalFilePath,path.extname(originalFilePath));
+export function getNameOfTestFile(originalFilePath: string): string {
+	var nameOfOriginalFile = path.basename(originalFilePath, path.extname(originalFilePath));
 	var nameOfTestFile = nameOfOriginalFile + "_test" + path.extname(originalFilePath);
 
 	return nameOfTestFile;
 }
 
 
-export function searchSourceFilePath(source_file_name: string) : string | null {
+export function searchSourceFilePath(source_file_name: string): string | null {
 	var pathOfSourceFolder = vscode.workspace.rootPath + "/lib";
 
 	var result = findPathsWithFileName(pathOfSourceFolder, source_file_name, []);
 
-	if(result.length >= 1) {
+	if (result.length >= 1) {
 		return result[0];
 	}
 	else {
@@ -107,13 +107,13 @@ export function searchSourceFilePath(source_file_name: string) : string | null 
 	}
 }
 
-export function searchTestFilePath(test_file_name: string) : string | null{
-	
+export function searchTestFilePath(test_file_name: string): string | null {
+
 	var pathOfTestFolder = vscode.workspace.rootPath + "/test";
 
 	var result = findPathsWithFileName(pathOfTestFolder, test_file_name, []);
 
-	if(result.length >= 1) {
+	if (result.length >= 1) {
 		return result[0];
 	}
 	else {
@@ -123,28 +123,24 @@ export function searchTestFilePath(test_file_name: string) : string | null{
 }
 
 /// Returns paths of files with 
-export function findPathsWithFileName(baseFolder : string ,fileName : string, result: string[]) 
-{
-    var files = fs.readdirSync(baseFolder); 
-    result = result || []; 
+export function findPathsWithFileName(baseFolder: string, fileName: string, result: string[]) {
+	var files = fs.readdirSync(baseFolder);
+	result = result || [];
 
-    files.forEach( 
-        function (file: string) {
-            var newBaseFolder = path.join(baseFolder,file);
-            if ( fs.statSync(newBaseFolder).isDirectory() )
-            {
-                result = findPathsWithFileName(newBaseFolder,fileName,result);
-            }
-            else
-            {
-                if ( file === fileName )
-                {
-                    result.push(newBaseFolder);
-                } 
-            }
-        }
-    );
-    return result;
+	files.forEach(
+		function (file: string) {
+			var newBaseFolder = path.join(baseFolder, file);
+			if (fs.statSync(newBaseFolder).isDirectory()) {
+				result = findPathsWithFileName(newBaseFolder, fileName, result);
+			}
+			else {
+				if (file === fileName) {
+					result.push(newBaseFolder);
+				}
+			}
+		}
+	);
+	return result;
 }
 
 export function openDocumentInEditor(filePath: string) {
@@ -155,9 +151,9 @@ export function openDocumentInEditor(filePath: string) {
 	vscode.workspace.openTextDocument(openPath).then(doc => {
 
 		//console.log("Opened " + openPath);
-		
 
-	  vscode.window.showTextDocument(doc);
+
+		vscode.window.showTextDocument(doc);
 	});
 }
 
@@ -166,15 +162,15 @@ export function getPackageName() {
 	var pubspecPath = vscode.workspace.rootPath + "/pubspec.yaml";
 
 	var content = fs.readFileSync(pubspecPath).toString();
-	
+
 	//Search for the line "name: <package-name>" in pubspec.yaml
 	var matches = content.match(/^name: (\w*)/);
 
-	if(matches !== null && matches.length >= 2) {
+	if (matches !== null && matches.length >= 2) {
 		return matches[1];
 	}
 	else {
-		throw "Could not find the package name in pubspec.yaml";
+		throw new Error("Could not find the package name in pubspec.yaml");
 	}
 
 }
