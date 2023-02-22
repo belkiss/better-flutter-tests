@@ -89,7 +89,7 @@ function updateStatusBarItem() {
       myStatusBarItem.hide();
     }
   }
-  catch (e: unknown) {
+  catch (e) {
     if (e instanceof Error) {
       vscode.window.showErrorMessage(e.message);
     }
