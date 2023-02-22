@@ -22,12 +22,13 @@ export function activate(context: vscode.ExtensionContext) {
             }
             else if (fileOperations.isPathInLibFolder(path)) {
                 var testFilePath = fileOperations.getPathOfTestFile(path);
-                if (fs.existsSync(testFilePath)) {
-                    var rootPath = vscode.workspace.rootPath || "";
-                    pathToExecute = testFilePath.substr(rootPath.length + 1);
+
+                var pubspecPath = fileOperations.findPubspecYamlDir(testFilePath);
+                if (pubspecPath !== undefined && fs.existsSync(testFilePath)) {
+                    pathToExecute = testFilePath.substring(pubspecPath.length + 1);
                 }
                 else {
-                    //TODO: Entweder Fehlermeldung anzeigen, oder an GoToTests weiterleiten
+                    //TODO: Either display the error message or forward to Gototests
 
                     // var selection = await vscode.window.showQuickPick(["Yes", "No"], { "placeHolder": "Could not find test '" + fileOperations.getNameOfTestFile(path) + "' in 'test/'. Do you want to create it?" });
                     // if (selection === "Yes") {
@@ -42,6 +43,7 @@ export function activate(context: vscode.ExtensionContext) {
                     terminal = vscode.window.createTerminal("Flutter Tests");
                 }
                 terminal.show();
+                terminal.sendText("cd " + pubspecPath);
                 terminal.sendText("flutter test --coverage " + pathToExecute);
             }
         }

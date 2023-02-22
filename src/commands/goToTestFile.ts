@@ -13,7 +13,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 		console.log("GoToTestFile-Args:");
 		console.log(args);
-		//-> Man muss aufpassen, weil args variieren kann, je nachdem von wo das commando aufgerufen wurde
+		//-> You have to be careful because Args can vary depending on where the commando was called
 		var className: string | undefined;
 		if (typeof (args[0]) === "string") {
 			className = args[0];
@@ -23,9 +23,9 @@ export function activate(context: vscode.ExtensionContext) {
 
 		if (path !== undefined) {
 			if (fileOperations.isPathInLibFolder(path)) {
-				// TODO: Erst schauen, ob die Test Datei am vorgesehen Ort existiert
-				// Falls nicht kann immer noch danach gesucht werden die Datei zu verschieben (Info Dialog)
-				var searchResultPath = fileOperations.searchTestFilePath(fileOperations.getNameOfTestFile(path));
+				// TODO: First see if the test file exists at the scheduled location
+				// If not, you can still search for the file to move the file (Info Dialog)
+				var searchResultPath = fileOperations.getPathOfTestFile(path);
 
 				if (searchResultPath !== null) {
 					//Note: Maybe check, if the path is correct to the original file path? Otherwise recommend to move it to another path?

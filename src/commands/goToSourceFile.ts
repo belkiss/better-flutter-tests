@@ -4,12 +4,12 @@ import * as fileOperations from '../file_operations';
 
 export function activate(context: vscode.ExtensionContext) {
 	let disposableGoToSource = vscode.commands.registerCommand('better-tests.goToSourceFile', async (args) => {
-		// TODO: Erst schauen, ob die Test Datei am vorgesehen Ort existiert
-		// Falls nicht kann immer noch danach gesucht werden die Datei zu verschieben (Info Dialog)
+		// TODO: First see if the test file exists at the scheduled location
+		// If not, you can still search for the file to move the file (Info Dialog)
 
 		var path = vscode.window.activeTextEditor?.document.uri.path;
 		if (path !== undefined) {
-			var searchResultPath = fileOperations.searchSourceFilePath(fileOperations.getNameOfSourceFile(path));
+			var searchResultPath = fileOperations.getPathOfSourceFile(path);
 
 			if (searchResultPath !== null) {
 				//Note: Maybe check, if the path is correct to the original file path? Otherwise recommend to move it to another path?

@@ -4,20 +4,17 @@ import * as path from 'path';
 
 /// Looks, if the path is in /lib folder
 export function isPathInLibFolder(path: string): boolean {
-	var libPath = vscode.workspace.rootPath + "/lib";
-	return path.indexOf(libPath) === 0;
+	return path.indexOf("/lib/") >= 0;
 }
 
 export function isTestFile(filePath: string): boolean {
-	var testPath = vscode.workspace.rootPath + "/test";
-
-	return filePath.indexOf(testPath) === 0 && path.basename(filePath).indexOf("_test.dart") >= 0;
+	return filePath.indexOf("/test/") >= 0 && path.basename(filePath).indexOf("_test.dart") >= 0;
 }
 
 export function getRelativePathInLibFolder(filePath: string): string {
 	if (isPathInLibFolder(filePath)) {
-		var libPath = vscode.workspace.rootPath + "/lib";
-		return filePath.substr(libPath.length);
+		var index = filePath.indexOf("/lib/");
+		return filePath.substring(index + 4);
 	}
 	else {
 		throw new Error(`${filePath} is not inside of /lib`);
@@ -53,24 +50,40 @@ export function getPathOfTestFolder(originalFolderPath: string): string {
 	else {
 		throw new Error("No open workspaceFolders");
 	}
-
-
 }
 
-/// relativPathToLibFolder is
+export function findPubspecYamlDir(filePath: string): string | undefined {
+	if (fs.existsSync(filePath)) {
+		var candidate = filePath;
+		if (fs.lstatSync(filePath).isFile()) {
+			candidate = path.dirname(filePath);
+		}
+
+		do {
+			if (fs.existsSync(candidate + "/pubspec.yaml")) {
+				return candidate;
+			}
+
+			var parent = path.dirname(candidate);
+			candidate = parent !== candidate ? parent : "";
+		}
+		while (candidate !== "");
+	}
+	return undefined;
+}
+
+export function getPathOfSourceFile(filePath: string): string {
+	var nameOfSourceFile = getNameOfSourceFile(filePath);
+	var folderOfSourceFile = path.dirname(filePath).replace("/test/", "/lib/");
+
+	return folderOfSourceFile + "/" + nameOfSourceFile;
+}
+
 export function getPathOfTestFile(originalFilePath: string): string {
-	var relativPathToLibFolder = getRelativePathInLibFolder(originalFilePath);
-	var folderOfTestFile = "test" + path.dirname(relativPathToLibFolder);
+	var nameOfTestFile = getNameOfTestFile(originalFilePath);
+	var folderOfTestFile = path.dirname(originalFilePath).replace("/lib/", "/test/");
 
-	if (vscode.workspace.workspaceFolders !== undefined) {
-		var rootPath = vscode.workspace.workspaceFolders[0].uri.path;
-
-		return rootPath + "/" + folderOfTestFile + "/" + getNameOfTestFile(originalFilePath);
-	}
-	else {
-		throw new Error("No open workspaceFolders");
-	}
-	//TODO: Exception werfen
+	return folderOfTestFile + "/" + nameOfTestFile;
 }
 
 export function getNameOfSourceFile(originalFilePath: string): string {
@@ -81,7 +94,7 @@ export function getNameOfSourceFile(originalFilePath: string): string {
 		return "";
 	}
 	else {
-		var nameOfSourceFile = nameOfOriginalFile.substr(0, idx) + path.extname(originalFilePath);
+		var nameOfSourceFile = nameOfOriginalFile.substring(0, idx) + path.extname(originalFilePath);
 		return nameOfSourceFile;
 	}
 }
@@ -91,20 +104,6 @@ export function getNameOfTestFile(originalFilePath: string): string {
 	var nameOfTestFile = nameOfOriginalFile + "_test" + path.extname(originalFilePath);
 
 	return nameOfTestFile;
-}
-
-
-export function searchSourceFilePath(source_file_name: string): string | null {
-	var pathOfSourceFolder = vscode.workspace.rootPath + "/lib";
-
-	var result = findPathsWithFileName(pathOfSourceFolder, source_file_name, []);
-
-	if (result.length >= 1) {
-		return result[0];
-	}
-	else {
-		return null;
-	}
 }
 
 export function searchTestFilePath(test_file_name: string): string | null {

@@ -36,7 +36,7 @@ export function createTestFile(originalFilePath: string, className: string | und
 
 
 			var testFileContent = getTestFileContent(getPackagePath(originalFilePath), testGroupName);
-			//TODO: Checken, ob Datei bereits existiert, um Überschreiben zu verhindern!
+			//TODO: Check whether the file already exists to prevent overwriting!
 			fs.writeFile(pathOfTestFile, testFileContent, (err) => {
 				if (err) { throw err; }
 

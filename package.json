@@ -30,10 +30,7 @@
 	},
 	"icon": "assets/logo.png",
 	"activationEvents": [
-		"onLanguage:dart",
-		"onCommand:better-tests.goToTestFile",
-		"onCommand:better-tests.goToSourceFile",
-		"onCommand:better-tests.executeTestsInTestFile"
+		"onLanguage:dart"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
